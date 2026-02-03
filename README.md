@@ -3,6 +3,7 @@
 <div align="center">
 
 # JFrog IntelliJ IDEA Plugin
+change
 
 ![JFrog IntelliJ IDEA Plugin Marketplace Installs](https://img.shields.io/jetbrains/plugin/d/9834-jfrog?label=Marketplace%20installs&color=blue&style=for-the-badge)
 
