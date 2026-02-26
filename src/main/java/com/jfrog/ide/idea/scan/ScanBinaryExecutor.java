@@ -73,6 +73,7 @@ public abstract class ScanBinaryExecutor {
     @Getter
     private static String osDistribution;
     private static LocalDateTime nextUpdateCheck;
+    private static String lastDownloadedVersion;
     protected final SourceCodeScanType scanType;
     protected Collection<PackageManagerType> supportedPackageTypes;
     private final Log log;
@@ -209,7 +210,8 @@ public abstract class ScanBinaryExecutor {
         synchronized (downloadLock) {
             LocalDateTime currentTime = LocalDateTime.now();
             boolean targetExists = Files.exists(binaryTargetPath);
-            if (targetExists && nextUpdateCheck != null && currentTime.isBefore(nextUpdateCheck)) {
+            boolean versionChanged = !getEffectiveScannerVersion().equals(lastDownloadedVersion);
+            if (targetExists && !versionChanged && nextUpdateCheck != null && currentTime.isBefore(nextUpdateCheck)) {
                 return;
             }
             ServerConfig server = GlobalSettings.getInstance().getServerConfig();
@@ -222,6 +224,7 @@ public abstract class ScanBinaryExecutor {
                         String latestBinaryChecksum = getFileChecksumFromServer(artifactoryManager, externalResourcesRepo);
                         String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
                         if (latestBinaryChecksum.equals(currentBinaryCheckSum)) {
+                            lastDownloadedVersion = getEffectiveScannerVersion();
                             nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
                             return;
                         }
@@ -231,6 +234,7 @@ public abstract class ScanBinaryExecutor {
                     log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));
                 }
                 downloadBinary(artifactoryManager, externalResourcesRepo);
+                lastDownloadedVersion = getEffectiveScannerVersion();
             }
         }
     }
