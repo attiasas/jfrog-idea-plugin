@@ -58,7 +58,7 @@ public abstract class ScanBinaryExecutor {
     private static final int USER_NOT_ENTITLED = 31;
     private static final int NOT_SUPPORTED = 13;
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
-    static final String DEFAULT_SCANNER_BINARY_VERSION = "1.20.1";
+    static final String DEFAULT_SCANNER_BINARY_VERSION = "1.30.1";
     private static final String BINARY_DOWNLOAD_URL_PREFIX = "xsc-gen-exe-analyzer-manager-local/v1/";
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
     private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
