@@ -82,13 +82,6 @@ public class GradleScannerTest extends HeavyPlatformTestCase {
     public void testBuildTree() throws IOException {
         GradleProjectImportUtil.linkAndRefreshGradleProject(globalProjectDir, getProject());
 
-        // Verify that a Gradle distribution is available before attempting to build the tree
-        GradleScanner checkScanner = new GradleScanner(getProject(), globalProjectDir, executorService, null);
-        if (checkScanner.getGradleExeAndJdk(new HashMap<>()) == null) {
-            System.out.println("Skipping testBuildTree: no global Gradle distribution configured in IDE settings");
-            return;
-        }
-
         GradleScanner gradleScanner = new GradleScanner(getProject(), globalProjectDir, executorService, new GraphScanLogic(new NullLog()));
 
         // Run and check scan results
