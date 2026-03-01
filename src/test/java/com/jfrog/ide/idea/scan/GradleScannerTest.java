@@ -71,10 +71,6 @@ public class GradleScannerTest extends HeavyPlatformTestCase {
         GradleScanner gradleScanner = new GradleScanner(getProject(), globalProjectDir, executorService, null);
         Map<String, String> env = new HashMap<>();
         String gradleExe = gradleScanner.getGradleExeAndJdk(env);
-        if (gradleExe == null) {
-            System.out.println("Skipping testGetGradleGlobalExeAndJdk: no global Gradle distribution configured in IDE settings");
-            return;
-        }
         assertEquals(System.getenv("JAVA_HOME"), env.get("JAVA_HOME"));
         new GradleDriver(gradleExe, null).verifyGradleInstalled();
     }
