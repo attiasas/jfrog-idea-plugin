@@ -252,7 +252,10 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         if (!isTransitive) {
             Multimap<String, String> fixVersionToCves = ArrayListMultimap.create();
             dependency.children().asIterator().forEachRemaining(issueNode -> {
-                List<String> fixVersionStrings = ListUtils.emptyIfNull(((VulnerabilityNode) issueNode).getFixedVersions());
+                if (!(issueNode instanceof VulnerabilityNode vulnerability)) {
+                    return;
+                }
+                List<String> fixVersionStrings = ListUtils.emptyIfNull(vulnerability.getFixedVersions());
                 for (String fixVersionString : fixVersionStrings) {
                     String fixVersion = convertFixVersionStringToMinFixVersion(fixVersionString);
                     fixVersionToCves.put(fixVersion, issueNode.toString());
