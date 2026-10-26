@@ -11,8 +11,6 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.jcef.JBCefApp;
-import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
@@ -25,6 +23,7 @@ import com.jfrog.ide.idea.inspections.JumpToCode;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
+import com.jfrog.ide.idea.ui.webview.JcefSupport;
 import com.jfrog.ide.idea.ui.webview.WebviewManager;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -61,14 +60,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         verticalSplit = new OnePixelSplitter(false, 0.4f);
         verticalSplit.setFirstComponent(leftPanel);
         setContent(verticalSplit);
-        if (!JBCefApp.isSupported()) {
+        if (!JcefSupport.isAvailable()) {
             leftPanel.add(createJcefNotSupportedView(), 0);
             return;
         }
-        JBCefBrowser jbCefBrowser;
+        JComponent browserComponent;
 
         try {
-            jbCefBrowser = initVulnerabilityInfoBrowser(project);
+            browserComponent = initVulnerabilityInfoBrowser(project);
         } catch (IOException | URISyntaxException e) {
             Logger.getInstance().error("Local view couldn't be initialized.", e);
             leftPanel.removeAll();
@@ -85,7 +84,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
         alertIfCacheExpired();
         refreshView(true);
-        registerListeners(jbCefBrowser.getComponent());
+        registerListeners(browserComponent);
         isInitialized = true;
     }
 
@@ -222,12 +221,12 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         leftPanelContent.add(component, 0);
     }
 
-    private JBCefBrowser initVulnerabilityInfoBrowser(@NotNull Project project) throws IOException, URISyntaxException {
+    private JComponent initVulnerabilityInfoBrowser(@NotNull Project project) throws IOException, URISyntaxException {
         // When the webview is first opened, the issue/license message might be sent before the page is loaded, so we
         // send the message again when the page is done loading.
         webviewManager = new WebviewManager(project, () -> updateIssueOrLicenseInWebview(selectedIssue));
         Disposer.register(this, webviewManager);
-        return webviewManager.getBrowser();
+        return webviewManager.getComponent();
     }
 
     /**
