@@ -34,7 +34,7 @@ import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
 import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Strings;
-import org.jfrog.build.api.util.Log;
+import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
 
 import javax.annotation.CheckForNull;
@@ -76,31 +76,6 @@ public class ServerConfigImpl implements ServerConfig {
     static final String ACCESS_TOKEN_ENV = "JFROG_IDE_ACCESS_TOKEN";
     static final String PROJECT_ENV = "JFROG_IDE_PROJECT";
     public static final String EXTERNAL_RESOURCES_REPO_ENV = "JFROG_IDE_RELEASES_REPO";
-    /**
-     * The CLI library logs probe failures through this logger. A null logger crashes settings
-     * initialization when the CLI cannot run, so the probe keeps a logger that records nothing.
-     */
-    private static final Log CLI_PROBE_LOG = new Log() {
-        @Override
-        public void debug(String message) {
-        }
-
-        @Override
-        public void info(String message) {
-        }
-
-        @Override
-        public void warn(String message) {
-        }
-
-        @Override
-        public void error(String message) {
-        }
-
-        @Override
-        public void error(String message, Throwable e) {
-        }
-    };
 
     @OptionTag
     private ConnectionType connectionType;
@@ -527,7 +502,7 @@ public class ServerConfigImpl implements ServerConfig {
      * @return true if connection details loaded from JFrog CLI default server.
      */
     public boolean readConnectionDetailsFromJfrogCli() throws IOException {
-        JfrogCliDriver driver = new JfrogCliDriver(new HashMap<>(EnvironmentUtil.getEnvironmentMap()), CLI_PROBE_LOG);
+        JfrogCliDriver driver = new JfrogCliDriver(new HashMap<>(EnvironmentUtil.getEnvironmentMap()), new NullLog());
         if (!driver.isJfrogCliInstalled()) {
             return false;
         }
