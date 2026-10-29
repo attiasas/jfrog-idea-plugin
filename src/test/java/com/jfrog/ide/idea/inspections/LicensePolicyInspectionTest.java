@@ -27,6 +27,7 @@ public class LicensePolicyInspectionTest extends LightJavaCodeInsightFixtureTest
         ProblemDescriptor problem = inspect(dependency);
 
         assertFalse(hasUpgrade(problem));
+        assertEquals("JFrog: dependency <g:artifact:1.0> violates license policy (Apache-2.0)", problem.getDescriptionTemplate());
     }
 
     public void testVulnerabilityStillOffersUpgrade() {
@@ -37,6 +38,52 @@ public class LicensePolicyInspectionTest extends LightJavaCodeInsightFixtureTest
         ProblemDescriptor problem = inspect(dependency);
 
         assertTrue(hasUpgrade(problem));
+        assertEquals("JFrog: dependency <g:artifact:1.0> has security vulnerabilities", problem.getDescriptionTemplate());
+    }
+
+    public void testVulnerabilityAndLicenseNamesBoth() {
+        DependencyNode dependency = directDependency();
+        dependency.addIssue(new VulnerabilityNode("XRAY-1", Severity.High, "summary", List.of("1.2.3"),
+                null, null, "", null, null, null, null));
+        dependency.addIssue(new LicenseViolationNode("Apache License 2.0", "Apache-2.0", null, Severity.High, "", null));
+
+        ProblemDescriptor problem = inspect(dependency);
+
+        assertTrue(hasUpgrade(problem));
+        assertEquals("JFrog: dependency <g:artifact:1.0> has security vulnerabilities and violates license policy (Apache-2.0)",
+                problem.getDescriptionTemplate());
+    }
+
+    public void testMultipleLicenseViolationsAreNamedOnce() {
+        DependencyNode dependency = directDependency();
+        dependency.addIssue(new LicenseViolationNode("MIT License", "MIT", null, Severity.High, "", null));
+        dependency.addIssue(new LicenseViolationNode("GNU General Public License v2.0", "GPL-2.0", null, Severity.Medium, "", null));
+        dependency.addIssue(new LicenseViolationNode("MIT License", "MIT", null, Severity.High, "", null));
+
+        ProblemDescriptor problem = inspect(dependency);
+
+        assertFalse(hasUpgrade(problem));
+        assertEquals("JFrog: dependency <g:artifact:1.0> violates license policy (MIT, GPL-2.0)", problem.getDescriptionTemplate());
+    }
+
+    public void testUnnamedLicenseViolationOmitsParentheses() {
+        DependencyNode dependency = directDependency();
+        dependency.addIssue(new LicenseViolationNode("", "", null, Severity.High, "", null));
+
+        ProblemDescriptor problem = inspect(dependency);
+
+        assertEquals("JFrog: dependency <g:artifact:1.0> violates license policy", problem.getDescriptionTemplate());
+    }
+
+    public void testTransitiveLicenseViolationKeepsTransitiveWording() {
+        DependencyNode dependency = directDependency();
+        dependency.setIndirect(true);
+        dependency.addIssue(new LicenseViolationNode("MIT License", "MIT", null, Severity.High, "", null));
+
+        ProblemDescriptor problem = inspect(dependency);
+
+        assertFalse(hasUpgrade(problem));
+        assertEquals("JFrog: transitive dependency <g:artifact:1.0> violates license policy (MIT)", problem.getDescriptionTemplate());
     }
 
     private DependencyNode directDependency() {
