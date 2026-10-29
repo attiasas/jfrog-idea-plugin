@@ -28,6 +28,7 @@ public class LicensePolicyInspectionTest extends LightJavaCodeInsightFixtureTest
 
         assertFalse(hasUpgrade(problem));
         assertEquals("JFrog: dependency <g:artifact:1.0> violates license policy (Apache-2.0)", problem.getDescriptionTemplate());
+        assertEquals("Show in JFrog plugin - dependency <g:artifact:1.0>", showInTreeName(problem));
     }
 
     public void testVulnerabilityStillOffersUpgrade() {
@@ -39,6 +40,7 @@ public class LicensePolicyInspectionTest extends LightJavaCodeInsightFixtureTest
 
         assertTrue(hasUpgrade(problem));
         assertEquals("JFrog: dependency <g:artifact:1.0> has security vulnerabilities", problem.getDescriptionTemplate());
+        assertEquals("Show in JFrog plugin - dependency <g:artifact:1.0>", showInTreeName(problem));
     }
 
     public void testVulnerabilityAndLicenseNamesBoth() {
@@ -105,5 +107,14 @@ public class LicensePolicyInspectionTest extends LightJavaCodeInsightFixtureTest
             }
         }
         return false;
+    }
+
+    private static String showInTreeName(ProblemDescriptor problem) {
+        for (QuickFix<?> fix : problem.getFixes()) {
+            if (fix instanceof ShowInDependencyTree show) {
+                return show.getFamilyName();
+            }
+        }
+        return null;
     }
 }
